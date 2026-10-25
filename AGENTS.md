@@ -81,6 +81,10 @@ GitHub issues; the roadmap is `docs/roadmap.md`.
   `OPENCODE_MODEL` repo variable, falling back to `openrouter/openrouter/free` (OpenRouter's router
   over free models; single free models are often rate-limited); key from the
   `OPENROUTER_API_KEY` secret, which has a $0 credit limit.
+- `.github/workflows/opencode-triage.yml` — auto-triage: on a newly opened issue the same agent
+  gets a fixed prompt (the `issues` event has no comment text) and posts a comment with the cause,
+  affected code, proposed fix and a suggested triage label. It does not change code. Authors with
+  accounts younger than 30 days are skipped.
 
 ## Commit format
 

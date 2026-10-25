@@ -1,0 +1,62 @@
+name: opencode-triage
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Check account age
+        id: check
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const user = await github.rest.users.getByUsername({
+              username: context.payload.issue.user.login
+            });
+            const created = new Date(user.data.created_at);
+            const days = (Date.now() - created) / (1000 * 60 * 60 * 24);
+            return days >= 30;
+          result-encoding: string
+
+      - name: Checkout repository
+        if: steps.check.outputs.result == 'true'
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Triage issue
+        if: steps.check.outputs.result == 'true'
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        with:
+          model: ${{ vars.OPENCODE_MODEL || 'openrouter/openrouter/free' }}
+          prompt: |
+            В репозитории появилась новая задача. Это сервис бронирования звонков:
+            фронтенд на React в `src/` (Feature-Sliced Design), бэкенд на Fastify
+            и SQLite в `server/`, API-контракт в `spec/main.tsp`. Задачи обычно
+            описаны как жалоба пользователя, без готового решения.
+
+            Сделай первичный разбор и оставь в issue один комментарий на русском
+            со следующими разделами:
+
+            1. **Суть** — что не так, одной-двумя фразами своими словами.
+            2. **Причина** — почему это происходит, со ссылками на конкретные
+               файлы и функции (`путь:строка`). Если причину по коду установить
+               нельзя, так и напиши и перечисли, что проверил.
+            3. **Затронутые части** — какие слои придётся менять: спецификация,
+               сервер, клиент, тесты.
+            4. **Предлагаемый путь** — один рекомендуемый вариант исправления и,
+               если есть, альтернатива с её минусом.
+            5. **Открытые вопросы** — что должен решить владелец до начала работы.
+            6. **Метка** — одна из `ready-for-agent`, `ready-for-human`,
+               `needs-info`, `wontfix` и почему.
+
+            Не меняй код, не создавай ветки и pull request'ы: только комментарий.
