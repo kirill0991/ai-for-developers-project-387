@@ -76,6 +76,9 @@ GitHub issues; the roadmap is `docs/roadmap.md`.
   plus Playwright E2E and a Docker smoke test.
 - `.github/workflows/release-please.yml` — automated releases via release-please; a release PR
   appears after a `feat`/`fix` commit lands in `main`.
+- `.github/workflows/opencode.yml` — the OpenCode agent: runs on new issue and PR review comments
+  that contain `/oc` or `/opencode`, acts through the OpenCode GitHub App (OIDC), reads the model
+  key from the `ANTHROPIC_API_KEY` secret.
 
 ## Commit format
 
