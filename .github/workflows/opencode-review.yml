@@ -1,0 +1,74 @@
+name: opencode-review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: opencode-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # agent PRs are reviewed too: the reviewer is read-only, so it cannot push and loop.
+    # Skipped: drafts, forks (no secrets), the runner's own bot and release-please PRs.
+    if: |
+      !github.event.pull_request.draft &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.sender.login != 'github-actions[bot]' &&
+      !startsWith(github.event.pull_request.head.ref, 'release-please--')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: read
+      # PR comments go through the issues API
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Review pull request
+        uses: anomalyco/opencode/github@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # read-only: no edits, only git commands that show the change; prompts are denied
+          OPENCODE_CONFIG_CONTENT: '{"permission":{"edit":"deny","bash":{"*":"deny","git diff *":"allow","git log *":"allow","git show *":"allow"},"webfetch":"deny","external_directory":"deny","question":"deny","doom_loop":"deny"}}'
+        with:
+          model: ${{ vars.OPENCODE_MODEL || 'opencode/big-pickle' }}
+          use_github_token: true
+          agent: plan
+          share: false
+          prompt: |
+            Проведи ревью этого pull request. Это сервис бронирования звонков:
+            фронтенд на React в `src/` (Feature-Sliced Design), бэкенд на Fastify
+            и SQLite в `server/`, API-контракт в `spec/main.tsp`. Правила проекта
+            описаны в `AGENTS.md`.
+
+            Изменения смотри командой `git diff origin/${{ github.base_ref }}...HEAD`,
+            коммиты — `git log --format='%h %s' origin/${{ github.base_ref }}..HEAD`.
+            Если PR закрывает issue, сверь изменения с постановкой в этом issue.
+
+            Проверь по пунктам:
+
+            1. **Постановка** — сделано то, что просили в issue, и ничего лишнего.
+            2. **Ошибки** — логические ошибки, граничные случаи, обработка ошибок API.
+            3. **Контракт** — изменения API начинаются с `spec/main.tsp`;
+               `src/shared/api/generated.ts` и `server/schemas/` не правятся руками.
+            4. **Тесты** — новое поведение покрыто тестами, на сервере и на клиенте,
+               если меняются оба.
+            5. **Типы и стиль** — нет `any` без причины, код похож на соседний,
+               слои FSD не нарушены.
+            6. **Лишние файлы** — нет случайных изменений (`package-lock.json`,
+               сборка, отладочный код).
+            7. **Коммиты и заголовок PR** — Conventional Commits (`fix: …`,
+               `feat: …`), строчными буквами, в повелительном наклонении.
+
+            Оставь один комментарий на русском: короткий вердикт, затем замечания
+            списком со ссылками `путь:строка` и пометкой «блокер» или «можно позже».
+            Если замечаний нет, так и напиши. Код не меняй.

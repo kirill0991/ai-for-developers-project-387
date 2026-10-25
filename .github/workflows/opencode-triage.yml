@@ -6,6 +6,8 @@ on:
 
 jobs:
   triage:
+    # issues opened by bots (including the agent itself) are not triaged
+    if: github.event.issue.user.type != 'Bot' && github.event.sender.type != 'Bot'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -36,13 +38,15 @@ jobs:
         if: steps.check.outputs.result == 'true'
         uses: anomalyco/opencode/github@latest
         env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           # nobody answers permission prompts in CI: an "ask" hangs the job, so deny instead
-          OPENCODE_CONFIG_CONTENT: '{"permission":{"edit":"deny","bash":"deny","webfetch":"deny","external_directory":"deny"}}'
+          OPENCODE_CONFIG_CONTENT: '{"permission":{"edit":"deny","bash":"deny","webfetch":"deny","external_directory":"deny","question":"deny","doom_loop":"deny"}}'
         with:
-          model: ${{ vars.OPENCODE_MODEL || 'openrouter/openrouter/free' }}
+          model: ${{ vars.OPENCODE_MODEL || 'opencode/big-pickle' }}
           # read-only agent: the action pushes any file change as a pull request
           agent: plan
+          share: false
           prompt: |
             В репозитории появилась новая задача. Это сервис бронирования звонков:
             фронтенд на React в `src/` (Feature-Sliced Design), бэкенд на Fastify
