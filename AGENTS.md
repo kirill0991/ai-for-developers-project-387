@@ -88,9 +88,10 @@ GitHub issues; the roadmap is `docs/roadmap.md`.
   accounts younger than 30 days are skipped.
 - `.github/workflows/opencode-review.yml` — auto-review: on `pull_request` (opened, synchronize,
   reopened, ready_for_review) the read-only `plan` agent reviews the diff against the linked
-  issue with a fixed checklist and comments with the runner token (`use_github_token`, needs `pull-requests: write`). Agent PRs
-  are reviewed too (the reviewer cannot push, so there is no loop); drafts, forks and
-  release-please PRs are skipped.
+  issue with a fixed checklist and comments with the runner token (`use_github_token`, needs
+  `pull-requests: write`). Events triggered by bots are skipped: the action rejects actors
+  without write access, `opencode-agent[bot]` included, so to review an agent PR a human
+  closes and reopens it. Drafts, forks and release-please PRs are skipped too.
 - Model for all agent workflows: the `OPENCODE_MODEL` repo variable, falling back to
   `opencode/big-pickle` (a free OpenCode Zen model, key in the `OPENCODE_API_KEY` secret).
   `opencode/mimo-v2.6-flash-free` is the spare free model; `openrouter/openrouter/free` also works
