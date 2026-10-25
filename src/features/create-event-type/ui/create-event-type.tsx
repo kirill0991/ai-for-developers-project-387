@@ -75,6 +75,7 @@ export function CreateEventType() {
         />
         <NumberInput
           label="Длительность (минуты)"
+          description="От 1 до 540 минут — рабочий день 09:00–18:00"
           value={duration}
           onChange={setDuration}
           min={1}

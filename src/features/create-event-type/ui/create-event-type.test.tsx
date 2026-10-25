@@ -73,6 +73,15 @@ describe('CreateEventType', () => {
     expect(createEventType).not.toHaveBeenCalled();
   });
 
+  it('shows the duration hint before the form is submitted', () => {
+    renderForm();
+
+    expect(
+      screen.getByText('От 1 до 540 минут — рабочий день 09:00–18:00'),
+    ).toBeTruthy();
+    expect(createEventType).not.toHaveBeenCalled();
+  });
+
   it('shows an error when the duration is empty', async () => {
     const user = userEvent.setup();
     renderForm();
