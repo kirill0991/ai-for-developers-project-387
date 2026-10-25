@@ -87,6 +87,21 @@ describe('CreateEventType', () => {
     expect(createEventType).not.toHaveBeenCalled();
   });
 
+  it('shows an error when the duration is longer than the working day', async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.type(screen.getByLabelText('Название'), 'Воркшоп');
+    await user.clear(screen.getByLabelText('Длительность (минуты)'));
+    await user.type(screen.getByLabelText('Длительность (минуты)'), '541');
+    await user.click(screen.getByRole('button', { name: 'Создать' }));
+
+    expect(
+      await screen.findByText('Не больше 540 минут — это весь рабочий день 09:00–18:00'),
+    ).toBeTruthy();
+    expect(createEventType).not.toHaveBeenCalled();
+  });
+
   it('shows an error when the API rejects the request', async () => {
     vi.mocked(createEventType).mockRejectedValue(new ApiError(400, 'Bad Request'));
     const user = userEvent.setup();

@@ -26,7 +26,7 @@ model EventType {
 model EventTypeCreate {
   @minLength(1) name: string;
   description: string;
-  @minValue(1) duration: int32;
+  @minValue(1) @maxValue(540) duration: int32;
 }
 
 // --- Слоты ---

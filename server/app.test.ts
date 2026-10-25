@@ -85,6 +85,19 @@ describe('API', () => {
 
       expect(response.statusCode).toBe(400);
     });
+
+    it('rejects an event type longer than the working day', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/event-types',
+        payload: { name: 'Воркшоп', description: '', duration: 541 },
+      });
+
+      expect(response.statusCode).toBe(400);
+
+      const list = await app.inject({ method: 'GET', url: '/event-types' });
+      expect(list.json()).toHaveLength(0);
+    });
   });
 
   describe('slots', () => {
@@ -119,6 +132,37 @@ describe('API', () => {
         status: 'free',
       });
       expect(slots.every((slot: { status: string }) => slot.status === 'free')).toBe(true);
+    });
+
+    it('offers one full-day slot for a 540-minute type on each day of the horizon', async () => {
+      const created = await app.inject({
+        method: 'POST',
+        url: '/event-types',
+        payload: { name: 'Воркшоп', description: '', duration: 540 },
+      });
+      expect(created.statusCode).toBe(201);
+      const typeId = created.json().id;
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/slots?typeId=${typeId}&from=2026-10-19T00:00:00Z&to=2026-11-02T00:00:00Z`,
+      });
+
+      expect(response.statusCode).toBe(200);
+      const slots = response.json();
+      expect(slots).toHaveLength(14);
+      expect(slots[0]).toEqual({
+        start: '2026-10-19T06:00:00.000Z',
+        end: '2026-10-19T15:00:00.000Z',
+        status: 'free',
+      });
+      expect(slots.at(-1).start).toBe('2026-11-01T06:00:00.000Z');
+      expect(
+        slots.every(
+          (slot: { start: string; end: string }) =>
+            new Date(slot.end).getTime() - new Date(slot.start).getTime() === 9 * 60 * 60 * 1000,
+        ),
+      ).toBe(true);
     });
 
     it('marks a slot as occupied after it is booked', async () => {

@@ -17,6 +17,8 @@ function validate(name: string, duration: number | string): FormErrors {
 
   if (typeof duration !== 'number' || !Number.isInteger(duration) || duration < 1) {
     errors.duration = 'Укажите длительность — целое число минут больше нуля';
+  } else if (duration > 540) {
+    errors.duration = 'Не больше 540 минут — это весь рабочий день 09:00–18:00';
   }
 
   return errors;
