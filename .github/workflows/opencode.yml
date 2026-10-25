@@ -8,9 +8,12 @@ on:
 
 jobs:
   opencode:
+    # only people with write access call the agent; bots (the agent's own replies) never do
     if: |
-      contains(github.event.comment.body, '/oc') ||
-      contains(github.event.comment.body, '/opencode')
+      contains(github.event.comment.body, '/oc') &&
+      github.event.comment.user.type != 'Bot' &&
+      github.event.comment.user.login != 'opencode-agent[bot]' &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -26,9 +29,11 @@ jobs:
       - name: Run OpenCode
         uses: anomalyco/opencode/github@latest
         env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           # nobody answers permission prompts in CI: an "ask" hangs the job, so deny instead
-          OPENCODE_CONFIG_CONTENT: '{"permission":{"external_directory":"deny"}}'
+          OPENCODE_CONFIG_CONTENT: '{"permission":{"external_directory":"deny","question":"deny","doom_loop":"deny"}}'
         with:
-          model: ${{ vars.OPENCODE_MODEL || 'openrouter/openrouter/free' }}
-          mentions: /opencode,/oc
+          model: ${{ vars.OPENCODE_MODEL || 'opencode/big-pickle' }}
+          mentions: /oc
+          share: false

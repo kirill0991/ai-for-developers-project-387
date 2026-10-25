@@ -77,19 +77,27 @@ GitHub issues; the roadmap is `docs/roadmap.md`.
 - `.github/workflows/release-please.yml` — automated releases via release-please; a release PR
   appears after a `feat`/`fix` commit lands in `main`.
 - `.github/workflows/opencode.yml` — the OpenCode agent: runs on new issue and PR review comments
-  that contain `/oc` or `/opencode`, acts through the OpenCode GitHub App (OIDC). Model: the
-  `OPENCODE_MODEL` repo variable, falling back to `openrouter/openrouter/free` (OpenRouter's router
-  over free models; single free models are often rate-limited); key from the
-  `OPENROUTER_API_KEY` secret, which has a $0 credit limit.
+  that contain `/oc` (`mentions: /oc`), acts through the OpenCode GitHub App (OIDC). Only the
+  owner, members and collaborators can call it; comments from bots (the agent's own replies) are
+  ignored, so it cannot answer itself in a loop.
 - `.github/workflows/opencode-triage.yml` — auto-triage: on a newly opened issue the same agent
   gets a fixed prompt (the `issues` event has no comment text) and posts a comment with the cause,
   affected code, proposed fix and a suggested triage label. It runs the read-only `plan` agent,
   because the action turns any file change into a pull request (an `/oc explain` on the build
-  agent once opened PR #12 instead of answering). Authors with
+  agent once opened PR #12 instead of answering). Issues from bots and authors with
   accounts younger than 30 days are skipped.
-- Both agent workflows set `OPENCODE_CONFIG_CONTENT` so that permission prompts are denied instead of
+- `.github/workflows/opencode-review.yml` — auto-review: on `pull_request` (opened, synchronize,
+  reopened, ready_for_review) the read-only `plan` agent reviews the diff against the linked
+  issue with a fixed checklist and comments with the runner token (`use_github_token`, needs `pull-requests: write`). Agent PRs
+  are reviewed too (the reviewer cannot push, so there is no loop); drafts, forks and
+  release-please PRs are skipped.
+- Model for all agent workflows: the `OPENCODE_MODEL` repo variable, falling back to
+  `opencode/big-pickle` (a free OpenCode Zen model, key in the `OPENCODE_API_KEY` secret).
+  `opencode/mimo-v2.6-flash-free` is the spare free model; `openrouter/openrouter/free` also works
+  (`OPENROUTER_API_KEY`, $0 credit limit) but allows only ~50 requests a day.
+- All agent workflows set `OPENCODE_CONFIG_CONTENT` so that permission prompts are denied instead of
   asked (no one can answer them in CI; an `external_directory` prompt once hung the triage job for
-  10 minutes) and have a `timeout-minutes` cap.
+  10 minutes), have a `timeout-minutes` cap and `share: false`.
 
 ## Commit format
 
@@ -104,6 +112,9 @@ Conventional Commits only (`type: description`, lowercase, imperative). Allowed 
 - `test` — adding or changing tests
 - `chore` — build, auxiliary tools, dependencies
 - `build` / `ci` — build system or CI/CD changes
+
+This applies to the OpenCode agent too: the summary that ends your run becomes the commit message
+and the pull request title, so start it with the type, e.g. `fix: limit event type duration`.
 
 ## Agent skills
 
