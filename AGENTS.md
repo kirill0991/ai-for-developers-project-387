@@ -77,8 +77,9 @@ GitHub issues; the roadmap is `docs/roadmap.md`.
 - `.github/workflows/release-please.yml` — automated releases via release-please; a release PR
   appears after a `feat`/`fix` commit lands in `main`.
 - `.github/workflows/opencode.yml` — the OpenCode agent: runs on new issue and PR review comments
-  that contain `/oc` or `/opencode`, acts through the OpenCode GitHub App (OIDC). Model: the free
-  OpenCode Zen `opencode/deepseek-v4.1-flash-free`, key from the `OPENCODE_API_KEY` secret.
+  that contain `/oc` or `/opencode`, acts through the OpenCode GitHub App (OIDC). Model: the
+  `OPENCODE_MODEL` repo variable, falling back to the free OpenCode Zen
+  `opencode/glm-5.3-flash-free`; key from the `OPENCODE_API_KEY` secret.
 
 ## Commit format
 
