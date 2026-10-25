@@ -87,6 +87,9 @@ GitHub issues; the roadmap is `docs/roadmap.md`.
   because the action turns any file change into a pull request (an `/oc explain` on the build
   agent once opened PR #12 instead of answering). Authors with
   accounts younger than 30 days are skipped.
+- Both agent workflows set `OPENCODE_CONFIG_CONTENT` so that permission prompts are denied instead of
+  asked (no one can answer them in CI; an `external_directory` prompt once hung the triage job for
+  10 minutes) and have a `timeout-minutes` cap.
 
 ## Commit format
 

@@ -12,6 +12,7 @@ jobs:
       contains(github.event.comment.body, '/oc') ||
       contains(github.event.comment.body, '/opencode')
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       id-token: write
       contents: read
@@ -26,6 +27,8 @@ jobs:
         uses: anomalyco/opencode/github@latest
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # nobody answers permission prompts in CI: an "ask" hangs the job, so deny instead
+          OPENCODE_CONFIG_CONTENT: '{"permission":{"external_directory":"deny"}}'
         with:
           model: ${{ vars.OPENCODE_MODEL || 'openrouter/openrouter/free' }}
           mentions: /opencode,/oc
