@@ -7,6 +7,7 @@ on:
 jobs:
   triage:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       id-token: write
       contents: read
@@ -36,6 +37,8 @@ jobs:
         uses: anomalyco/opencode/github@latest
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # nobody answers permission prompts in CI: an "ask" hangs the job, so deny instead
+          OPENCODE_CONFIG_CONTENT: '{"permission":{"edit":"deny","bash":"deny","webfetch":"deny","external_directory":"deny"}}'
         with:
           model: ${{ vars.OPENCODE_MODEL || 'openrouter/openrouter/free' }}
           # read-only agent: the action pushes any file change as a pull request
