@@ -10,12 +10,13 @@ concurrency:
 
 jobs:
   review:
-    # agent PRs are reviewed too: the reviewer is read-only, so it cannot push and loop.
-    # Skipped: drafts, forks (no secrets), the runner's own bot and release-please PRs.
+    # events triggered by bots are skipped: the action refuses actors without write access
+    # (opencode-agent[bot] included), so a human reopens an agent PR to get it reviewed.
+    # Also skipped: drafts, forks (no secrets) and release-please PRs.
     if: |
       !github.event.pull_request.draft &&
       github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.sender.login != 'github-actions[bot]' &&
+      !endsWith(github.actor, '[bot]') &&
       !startsWith(github.event.pull_request.head.ref, 'release-please--')
     runs-on: ubuntu-latest
     timeout-minutes: 15
