@@ -12,7 +12,15 @@ pull request'ом.
 | Issue | Кто жалуется | Суть |
 |---|---|---|
 | [#1](https://github.com/kirill0991/ai-for-developers-project-387/issues/1) | Владелец | В списке броней остаются встречи, которые уже прошли |
-| [#2](https://github.com/kirill0991/ai-for-developers-project-387/issues/2) | Владелец, гости | На длинный тип события невозможно записаться |
+| [#2](https://github.com/kirill0991/ai-for-developers-project-387/issues/2) | Владелец, гости | На длинный тип события невозможно записаться (PR #18 от агента) |
+| [#15](https://github.com/kirill0991/ai-for-developers-project-387/issues/15) | Гость | Пришёл на звонок, а владельца нет |
+| [#21](https://github.com/kirill0991/ai-for-developers-project-387/issues/21) | Ночная проверка Lighthouse | У вкладки нет иконки, в консоли 404 на `/favicon.ico` |
+
+## Качество
+
+Отчёты ночной проверки Lighthouse (`.github/workflows/lighthouse-audit.yml`) агент оформляет
+issue с заголовком «Lighthouse: отчёт от …», первый — [#20](https://github.com/kirill0991/ai-for-developers-project-387/issues/20).
+Отдельные находки из отчёта заводятся как обычные задачи (как #21).
 
 ## Фичи
 
