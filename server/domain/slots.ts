@@ -29,9 +29,21 @@ export function generateSlots(from: Date, to: Date, durationMinutes: number): Sl
   const fromDay = moscowDayNumber(from);
   const toDay = moscowDayNumber(to);
 
+  // For long-duration events (longer than the working day), we start from the earliest possible time (09:00)
+  // and extend for the full duration. This allows events like "Workshop" (10 hours) to be bookable.
+  const startOfDayMinutes = SCHEDULE.startHour * 60; // 09:00 in minutes
+  const endOfDayMinutes = SCHEDULE.endHour * 60; // 18:00 in minutes
+  const workingDayMinutes = endOfDayMinutes - startOfDayMinutes; // 540 minutes = 9 hours
+
+  // If duration is longer than the working day, we start from 09:00 and extend for the full duration
+  // This allows long events to be booked starting at 09:00 and ending at 18:00 + (duration - 9 hours)
+  const effectiveStartMinutes = durationMinutes > workingDayMinutes
+    ? startOfDayMinutes
+    : SCHEDULE.endHour * 60 - durationMinutes;
+
   for (let day = fromDay; day <= toDay; day += 1) {
     const dayBase = day * DAY_MS; // UTC midnight of the Moscow wall-clock date
-    const lastStartMinutes = SCHEDULE.endHour * 60 - durationMinutes;
+    const lastStartMinutes = effectiveStartMinutes;
 
     for (
       let minutes = SCHEDULE.startHour * 60;
