@@ -78,8 +78,8 @@ GitHub issues; the roadmap is `docs/roadmap.md`.
   appears after a `feat`/`fix` commit lands in `main`.
 - `.github/workflows/opencode.yml` — the OpenCode agent: runs on new issue and PR review comments
   that contain `/oc` or `/opencode`, acts through the OpenCode GitHub App (OIDC). Model: the
-  `OPENCODE_MODEL` repo variable, falling back to the free OpenCode Zen
-  `opencode/glm-5.3-flash-free`; key from the `OPENCODE_API_KEY` secret.
+  `OPENCODE_MODEL` repo variable, falling back to the free OpenRouter
+  `openrouter/google/gemma-4-31b-it:free`; key from the `OPENROUTER_API_KEY` secret.
 
 ## Commit format
 

@@ -25,7 +25,7 @@ jobs:
       - name: Run OpenCode
         uses: anomalyco/opencode/github@latest
         env:
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         with:
-          model: ${{ vars.OPENCODE_MODEL || 'opencode/glm-5.3-flash-free' }}
+          model: ${{ vars.OPENCODE_MODEL || 'openrouter/google/gemma-4-31b-it:free' }}
           mentions: /opencode,/oc
