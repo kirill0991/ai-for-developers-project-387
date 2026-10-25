@@ -88,7 +88,7 @@ GitHub issues; the roadmap is `docs/roadmap.md`.
   accounts younger than 30 days are skipped.
 - `.github/workflows/opencode-review.yml` — auto-review: on `pull_request` (opened, synchronize,
   reopened, ready_for_review) the read-only `plan` agent reviews the diff against the linked
-  issue with a fixed checklist and comments with the runner token (`use_github_token`). Agent PRs
+  issue with a fixed checklist and comments with the runner token (`use_github_token`, needs `pull-requests: write`). Agent PRs
   are reviewed too (the reviewer cannot push, so there is no loop); drafts, forks and
   release-please PRs are skipped.
 - Model for all agent workflows: the `OPENCODE_MODEL` repo variable, falling back to
