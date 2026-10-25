@@ -1,0 +1,8 @@
+node_modules
+dist
+*.tsbuildinfo
+tsp-output
+calendar.db
+calendar.db-*
+test-results
+playwright-report

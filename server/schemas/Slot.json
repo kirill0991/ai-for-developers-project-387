@@ -1,0 +1,32 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "Slot.json",
+    "type": "object",
+    "properties": {
+        "start": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "end": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "status": {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "const": "free"
+                },
+                {
+                    "type": "string",
+                    "const": "occupied"
+                }
+            ]
+        }
+    },
+    "required": [
+        "start",
+        "end",
+        "status"
+    ]
+}

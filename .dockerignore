@@ -1,0 +1,12 @@
+node_modules
+dist
+tsp-output
+calendar.db
+calendar.db-*
+.git
+.github
+.agents
+.claude
+*.tsbuildinfo
+Dockerfile
+.dockerignore

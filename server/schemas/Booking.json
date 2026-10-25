@@ -1,0 +1,40 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "Booking.json",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "name": {
+            "type": "string"
+        },
+        "email": {
+            "type": "string"
+        },
+        "typeId": {
+            "type": "string"
+        },
+        "slotStart": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "slotEnd": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "createdAt": {
+            "type": "string",
+            "format": "date-time"
+        }
+    },
+    "required": [
+        "id",
+        "name",
+        "email",
+        "typeId",
+        "slotStart",
+        "slotEnd",
+        "createdAt"
+    ]
+}
