@@ -83,7 +83,9 @@ GitHub issues; the roadmap is `docs/roadmap.md`.
   `OPENROUTER_API_KEY` secret, which has a $0 credit limit.
 - `.github/workflows/opencode-triage.yml` — auto-triage: on a newly opened issue the same agent
   gets a fixed prompt (the `issues` event has no comment text) and posts a comment with the cause,
-  affected code, proposed fix and a suggested triage label. It does not change code. Authors with
+  affected code, proposed fix and a suggested triage label. It runs the read-only `plan` agent,
+  because the action turns any file change into a pull request (an `/oc explain` on the build
+  agent once opened PR #12 instead of answering). Authors with
   accounts younger than 30 days are skipped.
 
 ## Commit format
