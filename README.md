@@ -11,6 +11,10 @@
 **Демо:** https://calendar-calls-c6yz.onrender.com (Render, бесплатный тариф: после простоя
 первый запрос может идти до минуты, данные сбрасываются при перезапуске)
 
+Это продолжение проекта [«Календарь звонков»](https://github.com/kirill0991/ai-for-developers-project-386):
+приложение перенесено вместе с историей, а работа с агентом переезжает в GitHub-процесс.
+План развития — [docs/roadmap.md](docs/roadmap.md), задачи — в [issues](https://github.com/kirill0991/ai-for-developers-project-387/issues).
+
 ## Стек
 
 - React 19 + TypeScript
