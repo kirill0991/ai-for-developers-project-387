@@ -1,0 +1,103 @@
+name: lighthouse-audit
+
+on:
+  schedule:
+    # 03:00 UTC = 06:00 Moscow, once a day
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: lighthouse-audit
+
+jobs:
+  audit:
+    # never started by bots (including the agent itself)
+    if: ${{ !endsWith(github.actor, '[bot]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+      issues: write
+    env:
+      APP_URL: ${{ vars.APP_URL }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Wake up the app
+        # the free Render plan sleeps after inactivity; do not measure the cold start
+        run: |
+          test -n "$APP_URL" || { echo "::error::Set the APP_URL repository variable"; exit 1; }
+          curl -sf --retry 5 --retry-delay 15 --retry-all-errors --max-time 120 -o /dev/null "$APP_URL"
+
+      - name: Run Lighthouse
+        run: |
+          mkdir -p "$RUNNER_TEMP/lighthouse"
+          npx --yes lighthouse@12 "$APP_URL" --quiet \
+            --output=json --output=html --output-path="$RUNNER_TEMP/lighthouse/report" \
+            --chrome-flags="--headless=new --no-sandbox"
+
+      - name: Summarize report
+        id: summary
+        run: |
+          node scripts/lighthouse-summary.mjs "$RUNNER_TEMP/lighthouse/report.report.json" > "$RUNNER_TEMP/lighthouse/summary.md"
+          cat "$RUNNER_TEMP/lighthouse/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo 'text<<SUMMARY_EOF'
+            cat "$RUNNER_TEMP/lighthouse/summary.md"
+            echo 'SUMMARY_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload report
+        uses: actions/upload-artifact@v5
+        with:
+          name: lighthouse-report
+          path: ${{ runner.temp }}/lighthouse
+          retention-days: 30
+
+      - name: Turn findings into an issue
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # gh in the agent's shell creates the issue with the runner token
+          GH_TOKEN: ${{ github.token }}
+          # no file edits (the action would turn them into a PR); bash only for gh issue;
+          # nobody answers permission prompts in CI, so everything else is denied
+          OPENCODE_CONFIG_CONTENT: '{"permission":{"edit":"deny","bash":{"*":"deny","gh issue *":"allow","cat *":"allow"},"webfetch":"deny","external_directory":"deny","question":"deny","doom_loop":"deny"}}'
+        with:
+          model: ${{ vars.OPENCODE_MODEL || 'opencode/big-pickle' }}
+          agent: plan
+          share: false
+          prompt: |
+            Ночная проверка скорости приложения. Lighthouse (мобильный профиль)
+            проверил опубликованное приложение, сводка ниже. Полный отчёт (HTML и
+            JSON) лежит в артефакте `lighthouse-report` прогона
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            ${{ steps.summary.outputs.text }}
+
+            Это сервис бронирования звонков: фронтенд на React + Vite в `src/`,
+            `index.html` и `vite.config.ts` в корне; в production один процесс
+            Fastify (`server/`) отдаёт и API, и собранный SPA (`server/spa.ts`).
+
+            Что сделать:
+
+            1. Выбери до пяти самых важных находок. Для каждой найди в коде
+               причину (`путь:строка`) и предложи конкретное исправление. Находки,
+               которые зависят от хостинга, а не от кода, отметь отдельно.
+            2. Создай issue на русском командой
+               `gh issue create --label needs-triage --title "Lighthouse: отчёт от <дата YYYY-MM-DD>" --body "..."`.
+               В теле: таблица оценок, разобранные находки (суть, причина,
+               исправление, ожидаемый эффект) и ссылка на прогон выше.
+            3. Перед созданием проверь `gh issue list --state open --search "Lighthouse: отчёт in:title"`.
+               Если такой issue уже открыт, не создавай новый, а добавь в него
+               комментарий `gh issue comment <номер> --body "..."` с тем, что
+               изменилось.
+
+            Код не меняй: результат работы — только issue или комментарий.
