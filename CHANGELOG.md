@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/kirill0991/ai-for-developers-project-387/compare/v1.2.0...v1.2.1) (2026-10-25)
+
+
+### Bug Fixes
+
+* limit event type duration to workday ([#18](https://github.com/kirill0991/ai-for-developers-project-387/issues/18)) ([13f3661](https://github.com/kirill0991/ai-for-developers-project-387/commit/13f36612ef5421c17af05c8d54dc58d3d88e0e8b))
+
 ## [1.2.0](https://github.com/kirill0991/ai-for-developers-project-386/compare/v1.1.1...v1.2.0) (2026-10-21)
 
 
