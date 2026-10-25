@@ -3,6 +3,9 @@ import { Button, NumberInput, Stack, Text, Textarea, TextInput } from '@mantine/
 import { useNavigate } from 'react-router-dom';
 import { createEventType } from '../../../entities/event-type';
 
+// Рабочий день 09:00–18:00 длится 9 часов = 540 минут.
+const MAX_DURATION_MINUTES = 540;
+
 interface FormErrors {
   name?: string;
   duration?: string;
@@ -17,6 +20,8 @@ function validate(name: string, duration: number | string): FormErrors {
 
   if (typeof duration !== 'number' || !Number.isInteger(duration) || duration < 1) {
     errors.duration = 'Укажите длительность — целое число минут больше нуля';
+  } else if (duration > MAX_DURATION_MINUTES) {
+    errors.duration = `Не больше ${MAX_DURATION_MINUTES} минут — это весь рабочий день 09:00–18:00`;
   }
 
   return errors;
@@ -73,6 +78,7 @@ export function CreateEventType() {
         />
         <NumberInput
           label="Длительность (минуты)"
+          description={`От 1 до ${MAX_DURATION_MINUTES} минут — рабочий день 09:00–18:00`}
           value={duration}
           onChange={setDuration}
           min={1}

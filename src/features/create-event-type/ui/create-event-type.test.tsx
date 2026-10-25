@@ -73,6 +73,15 @@ describe('CreateEventType', () => {
     expect(createEventType).not.toHaveBeenCalled();
   });
 
+  it('shows the duration hint before the form is submitted', () => {
+    renderForm();
+
+    expect(
+      screen.getByText('От 1 до 540 минут — рабочий день 09:00–18:00'),
+    ).toBeTruthy();
+    expect(createEventType).not.toHaveBeenCalled();
+  });
+
   it('shows an error when the duration is empty', async () => {
     const user = userEvent.setup();
     renderForm();
@@ -83,6 +92,21 @@ describe('CreateEventType', () => {
 
     expect(
       await screen.findByText('Укажите длительность — целое число минут больше нуля'),
+    ).toBeTruthy();
+    expect(createEventType).not.toHaveBeenCalled();
+  });
+
+  it('shows an error when the duration is longer than the working day', async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.type(screen.getByLabelText('Название'), 'Воркшоп');
+    await user.clear(screen.getByLabelText('Длительность (минуты)'));
+    await user.type(screen.getByLabelText('Длительность (минуты)'), '541');
+    await user.click(screen.getByRole('button', { name: 'Создать' }));
+
+    expect(
+      await screen.findByText('Не больше 540 минут — это весь рабочий день 09:00–18:00'),
     ).toBeTruthy();
     expect(createEventType).not.toHaveBeenCalled();
   });

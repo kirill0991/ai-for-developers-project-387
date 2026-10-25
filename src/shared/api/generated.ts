@@ -33,7 +33,10 @@ export interface EventTypeCreate {
   /** @minLength 1 */
   name: string;
   description: string;
-  /** @minimum 1 */
+  /**
+     * @minimum 1
+     * @maximum 540
+     */
   duration: number;
 }
 
